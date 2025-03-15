@@ -14,7 +14,7 @@ class Sale(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    descount = models.IntegerField("Скидка", null=True, blank=True)
+    discount = models.IntegerField("Скидка", null=True, blank=True)
     description = CKEditor5Field(
         blank=True, verbose_name="Условия", config_name="extends"
     )
@@ -24,7 +24,7 @@ class Sale(models.Model):
         verbose_name_plural = "Типы акций"
 
     def __str__(self):
-        return f"Акция: скидка {self.descount}%"
+        return f"Акция: скидка {self.discount}%"
 
 
 class Brand(models.Model):
@@ -34,7 +34,9 @@ class Brand(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField("Название марки", max_length=50, unique=True)
-    country = models.CharField("Страна", max_length=50, null=True, blank=True)
+    country = models.CharField(
+        "Страна", max_length=50, null=True, blank=True, choices=vars.COUNTRIES
+    )
     image = models.ImageField(
         "Значок", upload_to=functions.get_path_for_avatar_brand, null=True, blank=True
     )
@@ -107,6 +109,7 @@ class Car(models.Model):
     mileage = models.IntegerField("Пробег", null=True, blank=True)
     price = models.IntegerField("Цена", null=True, blank=True)
     sale = models.BooleanField("Акция", default=False)
+    total_sum = models.IntegerField("Итоговая цена", null=True, blank=True)
     image = models.ImageField(
         "Значок", upload_to=functions.get_path_for_avatar_car, null=True, blank=True
     )
@@ -118,11 +121,13 @@ class Car(models.Model):
     def articul(self):
         return f"арт-{str(self.id).lower().replace('-', '')}"
 
-    @property
-    def total_sum(self):
-        if self.sale:
-            return self.price - self.price * self.sale.descount / 100
-        return self.price
+
+    def clean(self):
+        if not self.sale:
+            self.total_sum = self.price
+        else:
+            self.total_sum = self.price - self.price * self.sale.discount / 100
+        return super().clean()
 
     class Meta:
         verbose_name = "Машина"
@@ -183,6 +188,7 @@ class Review(models.Model):
     stars = models.SmallIntegerField(
         "Оценка", validators=[MinValueValidator(1), MaxValueValidator(5)], default=5
     )
+    verified = models.BooleanField("Проверен", default=False)
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
 

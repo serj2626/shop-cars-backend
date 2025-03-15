@@ -21,7 +21,7 @@ class SaleAdmin(admin.ModelAdmin):
     Админка акций
     """
 
-    list_display = ("descount",)
+    list_display = ("discount",)
 
 
 @admin.register(SaleCar)
@@ -43,6 +43,8 @@ class BrandAdmin(admin.ModelAdmin):
     """
 
     list_display = ("title", "country", "slug")
+    list_editable = ("country",)
+    save_on_top = True
 
 
 @admin.register(ModelCar)
@@ -57,7 +59,7 @@ class ModelCarAdmin(admin.ModelAdmin):
         "slug",
     )
 
-    list_editable = ("brand",)
+    list_editable = ("brand", "slug")
 
 
 @admin.register(Car)

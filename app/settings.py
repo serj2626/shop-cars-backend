@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "cars",
     "orders",
     "contacts",
+    "core",
     # 3rd apps
     "rest_framework",
     "corsheaders",
